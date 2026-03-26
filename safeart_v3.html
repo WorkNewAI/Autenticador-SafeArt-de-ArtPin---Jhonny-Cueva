@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SafeArt v3 — Enterprise Secure Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f1e;
+  --surface: #111827;
+  --surface2: #1a2235;
+  --border: #1e3a5f;
+  --border-light: #2d4a7a;
+  --accent: #3b82f6;
+  --accent2: #60a5fa;
+  --accent-glow: rgba(59,130,246,0.18);
+  --red: #ef4444;
+  --red-glow: rgba(239,68,68,0.15);
+  --green: #22c55e;
+  --green-glow: rgba(34,197,94,0.15);
+  --yellow: #f59e0b;
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --font: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 16px 60px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.layout { position: relative; z-index: 1; width: 100%; max-width: 520px; }
+
+/* ── HEADER ── */
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+  animation: fadeDown 0.6s ease;
+}
+.logo-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--surface), var(--surface2));
+  border: 1px solid var(--border-light);
+  border-radius: 50px;
+  padding: 10px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+.logo-icon { font-size: 20px; }
+.logo-text { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent2); }
+.logo-version { font-size: 10px; color: var(--text-muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: var(--mono); }
+.tagline { font-size: 12px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* ── MAIN CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.05);
+  animation: fadeUp 0.6s ease 0.1s both;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+}
+
+/* ── STEP INDICATOR ── */
+.step-bar { display: flex; gap: 6px; margin-bottom: 24px; }
+.step-dot {
+  flex: 1; height: 3px; border-radius: 99px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: all 0.4s ease;
+  position: relative; overflow: hidden;
+}
+.step-dot.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.step-dot.done { background: var(--green); border-color: var(--green); }
+.step-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; font-family: var(--mono); margin-bottom: 6px; text-align: center; }
+
+.view-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 4px; }
+.view-subtitle { font-size: 13px; color: var(--text-dim); text-align: center; margin-bottom: 22px; }
+
+/* ── INPUTS ── */
+.input-group { margin-bottom: 14px; position: relative; }
+.input-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; font-family: var(--mono); margin-bottom: 6px; display: block; }
+input[type=text], input[type=password], input[type=email] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  padding: 13px 16px;
+  transition: all 0.2s;
+  outline: none;
+}
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+input::placeholder { color: var(--text-muted); }
+input[type=password] { padding-right: 46px; }
+.eye {
+  position: absolute; right: 14px; bottom: 14px;
+  cursor: pointer; font-size: 16px; opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.eye:hover { opacity: 1; }
+.val-text { font-size: 11px; color: var(--red); margin-top: 5px; display: none; font-family: var(--mono); }
+
+/* ── CAPTCHA ── */
+.captcha-box {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+.captcha-box.solved { border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+.captcha-check { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.captcha-label { font-size: 14px; color: var(--text-dim); flex: 1; }
+.captcha-logo { font-size: 9px; color: var(--text-muted); text-align: right; line-height: 1.4; font-family: var(--mono); }
+.captcha-err { font-size: 11px; color: var(--red); display: none; margin-top: 4px; font-family: var(--mono); }
+
+/* ── RATE BANNER ── */
+.rate-banner {
+  background: var(--red-glow);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #fca5a5;
+  text-align: center;
+  display: none;
+  font-family: var(--mono);
+}
+
+/* ── TOTP ── */
+.totp-display {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: inset 0 0 30px rgba(59,130,246,0.05);
+}
+.totp-code {
+  font-family: var(--mono);
+  font-size: 38px;
+  font-weight: 500;
+  color: var(--accent2);
+  letter-spacing: 14px;
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+.totp-timer { font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: var(--mono); }
+.totp-bar { height: 3px; background: var(--surface2); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.totp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s linear; border-radius: 2px; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #2563eb);
+  color: white; border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
+.btn-primary:disabled { background: var(--surface2); color: var(--text-muted); cursor: not-allowed; box-shadow: none; transform: none; }
+.btn-ghost {
+  background: none; border: none;
+  color: var(--accent2); cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 500;
+  padding: 8px 4px; transition: color 0.2s; text-decoration: none;
+}
+.btn-ghost:hover { color: var(--accent); }
+
+/* ── LOGIN ALERT OVERLAY ── */
+.alert-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+.alert-overlay.show { display: flex; }
+.alert-modal {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 36px 32px;
+  max-width: 440px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(59,130,246,0.1);
+  position: relative;
+  animation: scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.alert-modal::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+  border-radius: 20px 20px 0 0;
+}
+.alert-icon { font-size: 42px; text-align: center; margin-bottom: 14px; }
+.alert-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.alert-body { font-size: 13px; color: var(--text-dim); text-align: center; line-height: 1.6; margin-bottom: 6px; }
+.alert-email-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 12px;
+  font-family: var(--mono); font-size: 12px; color: var(--accent2);
+  margin: 10px 0 20px;
+}
+.alert-detail { font-size: 11px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 22px; font-family: var(--mono); line-height: 1.7; }
+.alert-btns { display: flex; gap: 10px; }
+.btn-safe {
+  flex: 1; padding: 12px;
+  background: linear-gradient(135deg, var(--green), #16a34a);
+  color: white; border: none; border-radius: 10px;
+  cursor: pointer; font-family: var(--font); font-weight: 600; font-size: 13px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px var(--green-glow);
+}
+.btn-safe:hover { transform: translateY(-1px); }
+.btn-danger {
+  flex: 1; padding: 12px;
+  background: linear-gradient(135deg, var(--red), #b91c1c);
+  color: white; border: none; border-radius: 10px;
+  cursor: pointer; font-family: var(--font); font-weight: 600; font-size: 13px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px var(--red-glow);
+}
+.btn-danger:hover { transform: translateY(-1px); }
+
+/* ── CHANGE PASSWORD MODAL ── */
+.change-modal {
+  position: fixed; inset: 0; z-index: 1001;
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.change-modal.show { display: flex; }
+.change-inner {
+  background: var(--surface);
+  border: 1px solid rgba(239,68,68,0.4);
+  border-radius: 20px;
+  padding: 36px 32px;
+  max-width: 440px; width: 100%;
+  box-shadow: 0 20px 60px rgba(239,68,68,0.2);
+  animation: scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.change-inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+}
+
+/* ── WELCOME SCREEN ── */
+.welcome-screen {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; padding: 20px 0;
+}
+.welcome-screen.show { display: flex; }
+.welcome-avatar {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin-bottom: 20px;
+  box-shadow: 0 0 30px var(--accent-glow);
+  animation: pulse 2s infinite;
+}
+.welcome-name { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+.welcome-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+.session-info {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 18px;
+  width: 100%; text-align: left; margin-bottom: 16px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-muted); line-height: 1.8;
+}
+.session-info strong { color: var(--accent2); }
+
+/* ── SIEM LOG ── */
+.log-section {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.6s ease 0.3s both;
+}
+.log-header {
+  background: var(--bg);
+  padding: 10px 16px;
+  font-size: 11px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.log-header-left { display: flex; align-items: center; gap: 8px; }
+.log-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+.log-actions { display: flex; gap: 8px; }
+.log-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text-dim); border-radius: 6px;
+  padding: 3px 9px; font-size: 10px; cursor: pointer;
+  font-family: var(--mono); transition: all 0.2s;
+}
+.log-btn:hover { border-color: var(--accent); color: var(--accent2); }
+.log-box {
+  height: 160px; overflow-y: auto; padding: 12px 14px;
+  font-family: var(--mono); font-size: 10.5px; line-height: 1.6;
+  background: var(--surface);
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.le { margin-bottom: 4px; display: flex; gap: 6px; }
+.le-time { color: var(--text-muted); flex-shrink: 0; }
+.le-lvl { flex-shrink: 0; font-weight: 600; }
+.le-msg { color: var(--text-dim); }
+.lvl-info .le-lvl { color: #60a5fa; }
+.lvl-success .le-lvl { color: var(--green); }
+.lvl-warning .le-lvl { color: var(--yellow); }
+.lvl-error .le-lvl { color: var(--red); }
+.lvl-critical .le-lvl { color: #ff4444; animation: blink 1s infinite; }
+
+/* ── DATA PANEL ── */
+.data-panel {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp 0.6s ease 0.4s both;
+}
+.data-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
+.data-tab {
+  flex: 1; padding: 9px 12px; font-size: 11px; font-family: var(--mono);
+  color: var(--text-muted); cursor: pointer; text-align: center;
+  border: none; background: none; transition: all 0.2s; letter-spacing: 0.5px;
+}
+.data-tab.active { color: var(--accent2); border-bottom: 2px solid var(--accent); }
+.data-content {
+  background: var(--surface); padding: 12px 14px;
+  font-family: var(--mono); font-size: 10px; color: #64748b;
+  height: 120px; overflow-y: auto; line-height: 1.6;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.data-content .key { color: #60a5fa; }
+.data-content .val { color: #94a3b8; }
+.data-content .str { color: #86efac; }
+.data-content .hash { color: #fbbf24; font-size: 9px; word-break: break-all; }
+.export-row { display: flex; gap: 8px; padding: 10px 14px; background: var(--bg); border-top: 1px solid var(--border); }
+.export-btn {
+  flex: 1; padding: 7px; font-size: 11px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text-dim); cursor: pointer; font-family: var(--mono);
+  transition: all 0.2s; text-align: center;
+}
+.export-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ── EMAIL SIMULATION ── */
+.email-sim {
+  position: fixed; bottom: 20px; right: 20px; z-index: 500;
+  max-width: 320px; display: flex; flex-direction: column; gap: 8px;
+}
+.email-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  animation: slideInRight 0.4s ease;
+}
+.email-card-title { font-weight: 600; color: var(--accent2); margin-bottom: 4px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
+.email-card-body { color: var(--text-dim); font-family: var(--mono); font-size: 10px; line-height: 1.5; }
+.email-to { color: var(--yellow); }
+
+/* ── TOAST ── */
+#toastContainer { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; max-width: 320px; }
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  animation: slideInRight 0.3s ease;
+}
+.toast.success { border-left-color: var(--green); }
+.toast.warning { border-left-color: var(--yellow); }
+.toast.error, .toast.critical { border-left-color: var(--red); }
+.toast-title { font-weight: 600; font-size: 11px; font-family: var(--mono); letter-spacing: 0.5px; margin-bottom: 3px; color: var(--text-dim); }
+.toast-msg { color: var(--text); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideOut { from { opacity: 1; } to { opacity: 0; transform: translateX(60px); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<!-- Login alert overlay -->
+<div class="alert-overlay" id="loginAlertOverlay">
+  <div class="alert-modal">
+    <div class="alert-icon">🔐</div>
+    <div class="alert-title">¿Fuiste tú quien inició sesión?</div>
+    <div class="alert-body">Detectamos un nuevo inicio de sesión en tu cuenta. Se ha notificado a:</div>
+    <div style="text-align:center">
+      <span class="alert-email-badge">✉️ <span id="alertEmailDisplay"></span></span>
+    </div>
+    <div class="alert-detail" id="alertDetail"></div>
+    <div class="alert-btns">
+      <button class="btn-safe" onclick="loginConfirmed()">✅ Sí, fui yo</button>
+      <button class="btn-danger" onclick="loginDenied()">🚫 No fui yo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change password modal -->
+<div class="change-modal" id="changePassModal">
+  <div class="change-inner" style="position:relative">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:10px">🔒</div>
+      <div style="font-size:18px;font-weight:700;color:#fca5a5">Acceso bloqueado</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-top:6px">Por seguridad, debes cambiar tu contraseña para restaurar el acceso</div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Nueva contraseña</label>
+      <input type="password" id="newPassInput" placeholder="Mín. 8 chars, mayúscula, minúscula, número">
+      <span class="eye" onclick="toggleVis('newPassInput',this)">👁</span>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Confirmar contraseña</label>
+      <input type="password" id="confirmPassInput" placeholder="Repite la contraseña">
+      <span class="eye" onclick="toggleVis('confirmPassInput',this)">👁</span>
+    </div>
+    <div id="changePassErr" class="val-text" style="display:none;margin-bottom:10px"></div>
+    <button class="btn-primary" style="width:100%" onclick="doChangePassword()">Cambiar contraseña y restaurar acceso</button>
+  </div>
+</div>
+
+<!-- Email simulation panel -->
+<div class="email-sim" id="emailSim"></div>
+
+<div class="layout">
+  <!-- Header -->
+  <div class="header">
+    <div style="display:flex;justify-content:center">
+      <div class="logo-badge">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">SafeArt</span>
+        <span class="logo-version">v3.0</span>
+      </div>
+    </div>
+    <div class="tagline">Enterprise Secure Access · MFA + Email Alert</div>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+    <div id="rateBanner" class="rate-banner"></div>
+
+    <!-- Step bar -->
+    <div class="step-bar">
+      <div class="step-dot active" id="sd1"></div>
+      <div class="step-dot" id="sd2"></div>
+      <div class="step-dot" id="sd3"></div>
+      <div class="step-dot" id="sd4"></div>
+    </div>
+
+    <!-- ══ PASO 1 ══ -->
+    <div id="step1">
+      <div class="step-label">PASO 1 / 4 — IDENTIDAD</div>
+      <div class="view-title" id="viewTitle">Iniciar sesión</div>
+      <div class="view-subtitle" id="viewSub">Acceso seguro a tu cuenta SafeArt</div>
+
+      <div class="input-group">
+        <label class="input-label">Usuario</label>
+        <input type="text" id="userInput" placeholder="mínimo 8 caracteres alfanuméricos">
+        <div id="userVal" class="val-text">Mínimo 8 caracteres alfanuméricos.</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Contraseña</label>
+        <input type="password" id="passInput" placeholder="mayúscula, minúscula y número">
+        <span class="eye" id="togglePass" onclick="toggleVis('passInput',this)">👁</span>
+        <div id="passVal" class="val-text">Mayúscula, minúscula y número (mín. 8 chars).</div>
+      </div>
+      <div id="emailGroup" class="input-group hidden">
+        <label class="input-label">Correo electrónico</label>
+        <input type="email" id="emailInput" placeholder="tu@correo.com">
+        <div id="emailVal" class="val-text">Ingresa un correo válido.</div>
+      </div>
+
+      <div class="captcha-box" id="captchaBox" onclick="document.getElementById('captchaCheck').click()">
+        <input type="checkbox" class="captcha-check" id="captchaCheck" onclick="event.stopPropagation()" onchange="onCaptchaChange()">
+        <span class="captcha-label">No soy un robot</span>
+        <div class="captcha-logo">🔒<br>reCAPTCHA<br><span style="font-size:8px">Privacidad · Términos</span></div>
+      </div>
+      <div class="captcha-err" id="captchaErr">Por favor confirma que no eres un robot.</div>
+
+      <div class="btn-row">
+        <button class="btn-ghost" id="btnToggle">Crear cuenta</button>
+        <button class="btn-primary" onclick="validateStep1()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 2 ══ -->
+    <div id="step2" class="hidden">
+      <div class="step-label">PASO 2 / 4 — PIN</div>
+      <div class="view-title">Código PIN</div>
+      <div class="view-subtitle">PIN numérico de exactamente 4 dígitos</div>
+      <div class="input-group">
+        <label class="input-label">PIN</label>
+        <input type="text" id="pinInput" placeholder="0000" maxlength="4"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4)"
+          style="font-size:28px;letter-spacing:14px;font-family:var(--mono);text-align:center">
+        <div id="pinVal" class="val-text">Debe ser exactamente 4 dígitos.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="goTo(1)">← Atrás</button>
+        <button class="btn-primary" onclick="validateStep2()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 3 ══ -->
+    <div id="step3" class="hidden">
+      <div class="step-label">PASO 3 / 4 — SEGURIDAD</div>
+      <div class="view-title">Pregunta de seguridad</div>
+      <div class="view-subtitle">¿Cuál es el nombre de tu mascota favorita?</div>
+      <div class="input-group">
+        <label class="input-label">Respuesta</label>
+        <input type="text" id="petInput" placeholder="Tu respuesta">
+        <div id="petVal" class="val-text">La respuesta no puede estar vacía.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="goTo(2)">← Atrás</button>
+        <button class="btn-primary" onclick="validateStep3()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- ══ PASO 4: TOTP ══ -->
+    <div id="step_totp" class="hidden">
+      <div class="step-label">PASO 4 / 4 — MFA TOTP</div>
+      <div class="view-title">Verificación MFA</div>
+      <div class="view-subtitle">Código temporal de 6 dígitos</div>
+      <div class="totp-display">
+        <div class="totp-code" id="totpDisplay">——————</div>
+        <div class="totp-timer">Válido por: <strong id="totpCounter">30</strong>s</div>
+        <div class="totp-bar"><div class="totp-bar-fill" id="totpBarFill" style="width:100%"></div></div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:8px;font-family:var(--mono)">⚠ Código de un solo uso — expira automáticamente</div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Ingresa el código</label>
+        <input type="text" id="totpInput" placeholder="123456" maxlength="6"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)"
+          style="font-size:22px;letter-spacing:8px;font-family:var(--mono);text-align:center">
+        <div id="totpVal" class="val-text">Código incorrecto o expirado.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="goTo(3)">← Atrás</button>
+        <button class="btn-primary" id="finalBtn" onclick="submitFinal()">Entrar →</button>
+      </div>
+    </div>
+
+    <!-- ══ WELCOME ══ -->
+    <div id="welcomeScreen" class="welcome-screen hidden">
+      <div class="welcome-avatar">🎨</div>
+      <div class="welcome-name" id="welcomeName">Bienvenido</div>
+      <div class="welcome-sub" id="welcomeSub">Acceso autorizado · SafeArt Enterprise</div>
+      <div class="session-info" id="sessionInfo"></div>
+      <button class="btn-primary" onclick="doLogout()" style="width:100%">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <!-- SIEM Log -->
+  <div class="log-section">
+    <div class="log-header">
+      <div class="log-header-left">
+        <div class="log-dot"></div>
+        <span>SIEM · Monitoreo en Tiempo Real</span>
+      </div>
+      <div class="log-actions">
+        <button class="log-btn" onclick="exportData('logs')">📤 Logs</button>
+        <button class="log-btn" onclick="exportData('users')">👤 Users</button>
+        <button class="log-btn" onclick="exportData('all')">💾 JSON</button>
+        <button class="log-btn" onclick="clearLogs()">🗑</button>
+      </div>
+    </div>
+    <div class="log-box" id="logsBox"></div>
+  </div>
+
+  <!-- Data panel -->
+  <div class="data-panel">
+    <div class="data-tabs">
+      <button class="data-tab active" onclick="switchTab('users')">👤 USUARIOS</button>
+      <button class="data-tab" onclick="switchTab('sessions')">🔐 SESIONES</button>
+      <button class="data-tab" onclick="switchTab('raw')">{ } JSON RAW</button>
+    </div>
+    <div class="data-content" id="dataContent"></div>
+    <div class="export-row">
+      <button class="export-btn" onclick="exportData('users')">⬇ Exportar usuarios.json</button>
+      <button class="export-btn" onclick="exportData('sessions')">⬇ Exportar sesiones.json</button>
+      <button class="export-btn" onclick="exportData('all')">⬇ Exportar todo.json</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let isRegistering = false;
+let currentTab = 'users';
+let captchaSolved = false;
+let currentTotpCode = '';
+let totpInterval = null;
+let pendingLoginUser = null;  // usuario que está a punto de entrar
+
+const RATE_LIMIT_MAX    = 3;
+const RATE_LIMIT_WINDOW = 60000;
+let failedAttempts = 0;
+let blockedUntil   = 0;
+
+// ── BASE DE DATOS EN MEMORIA (se exporta a JSON) ──
+let DB = {
+  users:    [],   // { id, username, email, passHash, pinHash, petHash, salt, blocked, createdAt }
+  sessions: [],   // { id, userId, username, email, startedAt, ip, ua, confirmed, active }
+  logs:     []    // { timestamp, level, msg }
+};
+
+// ═══════════════════════════════════════════════════════
+//  CRYPTO — PBKDF2 + salt (máxima seguridad en browser)
+// ═══════════════════════════════════════════════════════
+function genSalt(len = 32) {
+  return Array.from(crypto.getRandomValues(new Uint8Array(len)))
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function pbkdf2Hash(text, salt) {
+  const enc = new TextEncoder();
+  const keyMat = await crypto.subtle.importKey(
+    'raw', enc.encode(text.toLowerCase().trim()),
+    'PBKDF2', false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode(salt), iterations: 310000, hash: 'SHA-512' },
+    keyMat, 512
+  );
+  return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verifyHash(text, salt, storedHash) {
+  const h = await pbkdf2Hash(text, salt);
+  return h === storedHash;
+}
+
+// ═══════════════════════════════════════════════════════
+//  PERSISTENCIA localStorage → "simula" archivo JSON
+// ═══════════════════════════════════════════════════════
+const LS_KEY = 'safeart_v3_db';
+
+function saveDB() {
+  localStorage.setItem(LS_KEY, JSON.stringify(DB));
+}
+
+async function loadDB() {
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) {
+    DB = JSON.parse(saved);
+  } else {
+    // Usuario por defecto: artadmin / SafeArt2024! / PIN 4321 / mascota: perro
+    const salt = genSalt();
+    const defaultUser = {
+      id: genId(),
+      username: 'artadmin',
+      email: 'artadmin@gmail.com',
+      passHash: await pbkdf2Hash('SafeArt2024!', salt),
+      pinHash:  await pbkdf2Hash('4321', salt),
+      petHash:  await pbkdf2Hash('perro', salt),
+      salt,
+      blocked: false,
+      createdAt: new Date().toISOString()
+    };
+    DB.users.push(defaultUser);
+    saveDB();
+    addLog('INFO', 'Usuario por defecto creado: artadmin / SafeArt2024! / PIN 4321 / perro · email: artadmin@gmail.com');
+  }
+
+  // Restaurar rate limit
+  const rl = localStorage.getItem('safeart_v3_rl');
+  if (rl) { const r = JSON.parse(rl); failedAttempts = r.a; blockedUntil = r.b; }
+
+  renderLogs(); refreshDataPanel(); checkRateBanner();
+}
+
+function saveRL() {
+  localStorage.setItem('safeart_v3_rl', JSON.stringify({ a: failedAttempts, b: blockedUntil }));
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT JSON FILES
+// ═══════════════════════════════════════════════════════
+function exportData(type) {
+  let data, filename;
+  if (type === 'logs') {
+    data = DB.logs;
+    filename = `safeart_siem_logs_${ts()}.json`;
+  } else if (type === 'users') {
+    data = DB.users;
+    filename = `safeart_users_${ts()}.json`;
+  } else if (type === 'sessions') {
+    data = DB.sessions;
+    filename = `safeart_sessions_${ts()}.json`;
+  } else {
+    data = DB;
+    filename = `safeart_full_db_${ts()}.json`;
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  addLog('INFO', `Exportado: ${filename}`);
+}
+
+function ts() { return new Date().toISOString().slice(0,10); }
+
+// ═══════════════════════════════════════════════════════
+//  LOGS & TOASTS
+// ═══════════════════════════════════════════════════════
+function addLog(level, msg) {
+  const entry = { timestamp: new Date().toISOString(), level, msg };
+  DB.logs.push(entry);
+  saveDB();
+  renderLogs();
+  if (['ERROR','WARNING','CRITICAL','SUCCESS'].includes(level)) showToast(level, msg);
+}
+
+function renderLogs() {
+  const box = document.getElementById('logsBox');
+  box.innerHTML = DB.logs.slice().reverse().map(e => {
+    const cls = `lvl-${e.level.toLowerCase()}`;
+    return `<div class="le ${cls}">
+      <span class="le-time">${new Date(e.timestamp).toLocaleTimeString('es-ES')}</span>
+      <span class="le-lvl">[${e.level}]</span>
+      <span class="le-msg">${escHtml(e.msg)}</span>
+    </div>`;
+  }).join('');
+}
+
+function showToast(level, msg) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  const cls = level === 'SUCCESS' ? 'success' : level === 'WARNING' ? 'warning' : level === 'CRITICAL' ? 'critical' : 'error';
+  const icon = { SUCCESS:'✅', WARNING:'⚠️', CRITICAL:'🚨', ERROR:'❌', INFO:'ℹ️' }[level] || 'ℹ️';
+  t.className = `toast ${cls}`;
+  t.innerHTML = `<div class="toast-title">${icon} SIEM — ${level}</div><div class="toast-msg">${escHtml(msg)}</div>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => t.remove(), 300); }, 5000);
+}
+
+function clearLogs() {
+  if (!confirm('¿Eliminar todos los logs del SIEM?')) return;
+  DB.logs = [];
+  saveDB();
+  renderLogs();
+  addLog('WARNING', 'Logs limpiados por el administrador');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════════════════
+//  DATA PANEL
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.data-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['users','sessions','raw'][i] === tab);
+  });
+  refreshDataPanel();
+}
+
+function refreshDataPanel() {
+  const c = document.getElementById('dataContent');
+  if (currentTab === 'users') {
+    if (!DB.users.length) { c.innerHTML = '<span style="color:var(--text-muted)">Sin usuarios registrados.</span>'; return; }
+    c.innerHTML = DB.users.map(u => `
+      <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <span class="key">id:</span> <span class="val">${u.id}</span> &nbsp;
+        <span class="key">user:</span> <span class="str">"${escHtml(u.username)}"</span> &nbsp;
+        <span class="key">email:</span> <span class="str">"${escHtml(u.email)}"</span> &nbsp;
+        <span class="key">blocked:</span> <span style="color:${u.blocked?'#ef4444':'#22c55e'}">${u.blocked}</span><br>
+        <span class="key">passHash:</span> <span class="hash">${u.passHash.slice(0,32)}…</span><br>
+        <span class="key">salt:</span> <span class="hash">${u.salt.slice(0,24)}…</span> &nbsp;
+        <span class="key">algo:</span> <span class="str">"PBKDF2-SHA512·310k"</span>
+      </div>`).join('');
+  } else if (currentTab === 'sessions') {
+    if (!DB.sessions.length) { c.innerHTML = '<span style="color:var(--text-muted)">Sin sesiones registradas.</span>'; return; }
+    c.innerHTML = DB.sessions.slice().reverse().map(s => `
+      <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+        <span class="key">user:</span> <span class="str">"${escHtml(s.username)}"</span> &nbsp;
+        <span class="key">email:</span> <span class="str">"${escHtml(s.email)}"</span><br>
+        <span class="key">at:</span> <span class="val">${s.startedAt}</span><br>
+        <span class="key">confirmed:</span> <span style="color:${s.confirmed==='yes'?'#22c55e':s.confirmed==='no'?'#ef4444':'#f59e0b'}">${s.confirmed}</span> &nbsp;
+        <span class="key">active:</span> <span style="color:${s.active?'#22c55e':'#64748b'}">${s.active}</span>
+      </div>`).join('');
+  } else {
+    const safe = JSON.stringify(DB, null, 2)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    c.innerHTML = `<pre style="font-size:9px;color:#64748b;white-space:pre-wrap">${safe}</pre>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  RATE LIMITING
+// ═══════════════════════════════════════════════════════
+function isBlocked() {
+  if (blockedUntil && Date.now() < blockedUntil) return true;
+  if (blockedUntil && Date.now() >= blockedUntil) {
+    failedAttempts = 0; blockedUntil = 0; saveRL();
+    document.getElementById('rateBanner').style.display = 'none';
+  }
+  return false;
+}
+
+function registerFail() {
+  failedAttempts++;
+  saveRL();
+  if (failedAttempts >= RATE_LIMIT_MAX) {
+    blockedUntil = Date.now() + RATE_LIMIT_WINDOW;
+    saveRL();
+    addLog('CRITICAL', `RATE LIMIT — Bloqueado por ${RATE_LIMIT_WINDOW/1000}s tras ${RATE_LIMIT_MAX} intentos fallidos`);
+    startCountdown();
+  } else {
+    addLog('WARNING', `Intento fallido #${failedAttempts}. Restantes: ${RATE_LIMIT_MAX - failedAttempts}`);
+  }
+  checkRateBanner();
+}
+
+function resetFails() {
+  failedAttempts = 0; blockedUntil = 0; saveRL();
+  document.getElementById('rateBanner').style.display = 'none';
+}
+
+function checkRateBanner() {
+  const b = document.getElementById('rateBanner');
+  if (isBlocked()) {
+    b.style.display = 'block';
+    b.textContent = `🚫 Bloqueado. Intenta en ${Math.ceil((blockedUntil-Date.now())/1000)}s`;
+  } else if (failedAttempts > 0) {
+    b.style.display = 'block';
+    b.textContent = `⚠️ ${failedAttempts} intento(s) fallido(s). Serás bloqueado en ${RATE_LIMIT_MAX - failedAttempts} más.`;
+  } else {
+    b.style.display = 'none';
+  }
+}
+
+function startCountdown() {
+  const interval = setInterval(() => {
+    if (!isBlocked()) { clearInterval(interval); checkRateBanner(); addLog('INFO','Bloqueo levantado'); return; }
+    checkRateBanner();
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CAPTCHA
+// ═══════════════════════════════════════════════════════
+function onCaptchaChange() {
+  captchaSolved = document.getElementById('captchaCheck').checked;
+  document.getElementById('captchaBox').classList.toggle('solved', captchaSolved);
+  if (captchaSolved) {
+    document.getElementById('captchaErr').style.display = 'none';
+    addLog('INFO', 'CAPTCHA resuelto — bot descartado');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOTP
+// ═══════════════════════════════════════════════════════
+function generateTOTP() {
+  const period = 30;
+  const step = Math.floor(Date.now() / 1000 / period);
+  const seed = 'safeart_v3_secret_' + step;
+  let h = 5381;
+  for (let i = 0; i < seed.length; i++) { h = ((h << 5) + h) + seed.charCodeAt(i); h |= 0; }
+  return String(Math.abs(h) % 1000000).padStart(6, '0');
+}
+
+function startTOTP() {
+  if (totpInterval) clearInterval(totpInterval);
+  const tick = () => {
+    const period = 30, epoch = Math.floor(Date.now() / 1000);
+    const left = period - (epoch % period);
+    currentTotpCode = generateTOTP();
+    document.getElementById('totpDisplay').textContent = currentTotpCode;
+    document.getElementById('totpCounter').textContent = left;
+    document.getElementById('totpBarFill').style.width = (left / period * 100) + '%';
+  };
+  tick(); totpInterval = setInterval(tick, 1000);
+  addLog('INFO', 'MFA — Código TOTP generado y activo (30s)');
+}
+
+function stopTOTP() {
+  if (totpInterval) { clearInterval(totpInterval); totpInterval = null; }
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goTo(s) {
+  document.querySelectorAll('[id^="step"]').forEach(el => el.classList.add('hidden'));
+  const id = s === 'totp' ? 'step_totp' : `step${s}`;
+  document.getElementById(id).classList.remove('hidden');
+  if (s === 'totp') startTOTP(); else stopTOTP();
+  updateStepDots(s);
+}
+
+function updateStepDots(s) {
+  const num = s === 'totp' ? 4 : parseInt(s);
+  [1,2,3,4].forEach(i => {
+    const d = document.getElementById(`sd${i}`);
+    d.className = 'step-dot' + (i < num ? ' done' : i === num ? ' active' : '');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  STEP VALIDATORS
+// ═══════════════════════════════════════════════════════
+function validateStep1() {
+  if (isBlocked()) { checkRateBanner(); addLog('CRITICAL','Intento mientras IP bloqueada'); return; }
+  if (!captchaSolved) {
+    document.getElementById('captchaErr').style.display = 'block';
+    addLog('WARNING', 'CAPTCHA no resuelto — posible bot');
+    return;
+  }
+  const u = document.getElementById('userInput').value.trim();
+  const p = document.getElementById('passInput').value;
+  const e = document.getElementById('emailInput').value.trim();
+  const uReg = /^[a-zA-Z0-9]{8,}$/;
+  const pReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const eReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let ok = true;
+
+  if (isRegistering) {
+    document.getElementById('userVal').style.display = uReg.test(u) ? 'none' : 'block';
+    if (!uReg.test(u)) ok = false;
+    document.getElementById('emailVal').style.display = eReg.test(e) ? 'none' : 'block';
+    if (!eReg.test(e)) ok = false;
+  } else {
+    document.getElementById('userVal').style.display = 'none';
+    document.getElementById('emailVal').style.display = 'none';
+  }
+  document.getElementById('passVal').style.display = pReg.test(p) ? 'none' : 'block';
+  if (!pReg.test(p)) ok = false;
+
+  if (ok) { addLog('INFO','Paso 1 OK — credenciales y CAPTCHA válidos'); goTo(2); }
+  else addLog('WARNING','Paso 1 fallido — validación incorrecta');
+}
+
+function validateStep2() {
+  const pin = document.getElementById('pinInput').value;
+  if (!/^\d{4}$/.test(pin)) {
+    document.getElementById('pinVal').style.display = 'block';
+    addLog('ERROR','PIN inválido — 4 dígitos requeridos');
+    return;
+  }
+  document.getElementById('pinVal').style.display = 'none';
+  addLog('SUCCESS','PIN validado'); goTo(3);
+}
+
+function validateStep3() {
+  const pet = document.getElementById('petInput').value.trim();
+  if (!pet) {
+    document.getElementById('petVal').style.display = 'block';
+    addLog('WARNING','Pregunta de seguridad vacía');
+    return;
+  }
+  document.getElementById('petVal').style.display = 'none';
+  addLog('INFO','Pregunta de seguridad respondida'); goTo('totp');
+}
+
+// ═══════════════════════════════════════════════════════
+//  SUBMIT FINAL
+// ═══════════════════════════════════════════════════════
+async function submitFinal() {
+  if (isBlocked()) { checkRateBanner(); addLog('CRITICAL','Formulario bloqueado — rate limit'); return; }
+
+  const entered = document.getElementById('totpInput').value.trim();
+  if (entered !== currentTotpCode) {
+    document.getElementById('totpVal').style.display = 'block';
+    addLog('ERROR','MFA — Código TOTP incorrecto o expirado');
+    registerFail(); return;
+  }
+  document.getElementById('totpVal').style.display = 'none';
+
+  const u    = document.getElementById('userInput').value.trim();
+  const p    = document.getElementById('passInput').value;
+  const pin  = document.getElementById('pinInput').value;
+  const pet  = document.getElementById('petInput').value.trim();
+  const em   = document.getElementById('emailInput').value.trim();
+
+  if (isRegistering) {
+    await doRegister(u, p, pin, pet, em);
+  } else {
+    await doLogin(u, p, pin, pet);
+  }
+}
+
+async function doRegister(u, p, pin, pet, em) {
+  if (DB.users.find(x => x.username.toLowerCase() === u.toLowerCase())) {
+    addLog('ERROR', `Registro fallido — usuario "${u}" ya existe`);
+    showToast('ERROR', 'Ese nombre de usuario ya está en uso.'); return;
+  }
+  const salt = genSalt();
+  const user = {
+    id: genId(),
+    username: u, email: em,
+    passHash: await pbkdf2Hash(p, salt),
+    pinHash:  await pbkdf2Hash(pin, salt),
+    petHash:  await pbkdf2Hash(pet, salt),
+    salt, blocked: false,
+    createdAt: new Date().toISOString()
+  };
+  DB.users.push(user);
+  saveDB();
+  addLog('SUCCESS', `REGISTRO COMPLETO — Usuario "${u}" <${em}> almacenado con PBKDF2-SHA512·310k`);
+  stopTOTP();
+  refreshDataPanel();
+
+  // Simular email de bienvenida
+  simEmail(em, '✉️ Bienvenido a SafeArt', `Tu cuenta ha sido creada exitosamente.\nUsuario: ${u}\nAlgoritmo: PBKDF2-SHA512 (310.000 iteraciones + salt único)`);
+
+  toggleMode(false);
+  showToast('SUCCESS', `Cuenta creada. Ahora inicia sesión.`);
+}
+
+async function doLogin(u, p, pin, pet) {
+  const user = DB.users.find(x => x.username.toLowerCase() === u.toLowerCase());
+  if (!user) {
+    addLog('CRITICAL', `Login fallido — usuario "${u}" no encontrado`);
+    registerFail(); return;
+  }
+  if (user.blocked) {
+    addLog('CRITICAL', `ACCESO DENEGADO — Cuenta "${u}" bloqueada por incidente de seguridad`);
+    showToast('CRITICAL', 'Tu cuenta está bloqueada. Contacta al administrador.');
+    return;
+  }
+  const pOk   = await verifyHash(p, user.salt, user.passHash);
+  const pinOk = await verifyHash(pin, user.salt, user.pinHash);
+  const petOk = await verifyHash(pet, user.salt, user.petHash);
+
+  if (pOk && pinOk && petOk) {
+    resetFails();
+    pendingLoginUser = user;
+
+    // Crear sesión pendiente de confirmación
+    const session = {
+      id: genId(),
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      startedAt: new Date().toISOString(),
+      ip: 'simulado-192.168.x.x',
+      ua: navigator.userAgent.slice(0,60),
+      confirmed: 'pending',
+      active: false
+    };
+    DB.sessions.push(session);
+    saveDB();
+    addLog('WARNING', `Login MFA OK — Esperando confirmación de usuario "${u}" <${user.email}>`);
+
+    // Mostrar alerta de verificación
+    showLoginAlert(user, session);
+  } else {
+    addLog('CRITICAL', `INTENTO FALLIDO — Credenciales incorrectas para "${u}"`);
+    registerFail();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOGIN ALERT (email simulation + modal)
+// ═══════════════════════════════════════════════════════
+function showLoginAlert(user, session) {
+  const detail = `Usuario: ${user.username}\nEmail: ${user.email}\nFecha: ${new Date().toLocaleString('es-ES')}\nNavegador: ${navigator.userAgent.slice(0,50)}…\nSesión ID: ${session.id}`;
+
+  document.getElementById('alertEmailDisplay').textContent = user.email;
+  document.getElementById('alertDetail').textContent = detail;
+  document.getElementById('loginAlertOverlay').classList.add('show');
+
+  // Simular envío de email
+  simEmail(
+    user.email,
+    '🔐 Nuevo inicio de sesión detectado — SafeArt',
+    `Se detectó un acceso a tu cuenta.\n\nUsuario: ${user.username}\nFecha/hora: ${new Date().toLocaleString('es-ES')}\n\nSi NO fuiste tú, presiona "No fui yo" en la pantalla para bloquear el acceso inmediatamente.`
+  );
+  addLog('INFO', `📧 Alerta de login enviada a ${user.email}`);
+}
+
+function loginConfirmed() {
+  document.getElementById('loginAlertOverlay').classList.remove('show');
+  if (!pendingLoginUser) return;
+
+  // Marcar sesión como confirmada
+  const s = DB.sessions.slice().reverse().find(x => x.userId === pendingLoginUser.id && x.confirmed === 'pending');
+  if (s) { s.confirmed = 'yes'; s.active = true; }
+  saveDB();
+
+  addLog('SUCCESS', `✅ ACCESO CONFIRMADO — "${pendingLoginUser.username}" verificó el inicio de sesión`);
+  stopTOTP();
+  showWelcome(pendingLoginUser);
+  pendingLoginUser = null;
+  refreshDataPanel();
+}
+
+function loginDenied() {
+  document.getElementById('loginAlertOverlay').classList.remove('show');
+  if (!pendingLoginUser) return;
+
+  const user = pendingLoginUser;
+
+  // Marcar sesión como denegada
+  const s = DB.sessions.slice().reverse().find(x => x.userId === user.id && x.confirmed === 'pending');
+  if (s) { s.confirmed = 'no'; s.active = false; }
+
+  // Bloquear cuenta
+  const u = DB.users.find(x => x.id === user.id);
+  if (u) u.blocked = true;
+  saveDB();
+
+  addLog('CRITICAL', `🚨 INCIDENTE — "${user.username}" reportó acceso no autorizado. Cuenta BLOQUEADA.`);
+  simEmail(user.email, '🚨 Cuenta bloqueada — SafeArt', `Tu cuenta "${user.username}" ha sido bloqueada por seguridad tras detectar un acceso no autorizado.\n\nPara restaurar el acceso deberás cambiar tu contraseña.`);
+
+  pendingLoginUser = user;
+  stopTOTP();
+  refreshDataPanel();
+
+  // Abrir modal de cambio de contraseña
+  setTimeout(() => { document.getElementById('changePassModal').classList.add('show'); }, 500);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHANGE PASSWORD
+// ═══════════════════════════════════════════════════════
+async function doChangePassword() {
+  const np = document.getElementById('newPassInput').value;
+  const cp = document.getElementById('confirmPassInput').value;
+  const pReg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const errEl = document.getElementById('changePassErr');
+
+  if (!pReg.test(np)) {
+    errEl.textContent = 'La contraseña debe tener mayúscula, minúscula y número (mín. 8 chars).';
+    errEl.style.display = 'block'; return;
+  }
+  if (np !== cp) {
+    errEl.textContent = 'Las contraseñas no coinciden.';
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+
+  const user = pendingLoginUser || DB.users.find(x => x.blocked);
+  if (!user) return;
+
+  const u = DB.users.find(x => x.id === user.id);
+  const newSalt = genSalt();
+  u.passHash = await pbkdf2Hash(np, newSalt);
+  u.pinHash  = await pbkdf2Hash(u.pinHash, newSalt); // keep pin structure, re-derive
+  u.salt     = newSalt;
+  u.blocked  = false;
+  saveDB();
+
+  addLog('SUCCESS', `🔑 Contraseña actualizada para "${u.username}" — Cuenta desbloqueada`);
+  simEmail(u.email, '✅ Contraseña actualizada — SafeArt', `Tu contraseña ha sido actualizada exitosamente y tu cuenta ha sido restaurada.\n\nAlgoritmo: PBKDF2-SHA512 (310.000 iteraciones + nuevo salt)`);
+
+  document.getElementById('changePassModal').classList.remove('show');
+  document.getElementById('newPassInput').value = '';
+  document.getElementById('confirmPassInput').value = '';
+  pendingLoginUser = null;
+
+  refreshDataPanel();
+  showToast('SUCCESS', `Contraseña actualizada. Puedes iniciar sesión nuevamente.`);
+  toggleMode(false);
+  goTo(1);
+}
+
+// ═══════════════════════════════════════════════════════
+//  WELCOME SCREEN
+// ═══════════════════════════════════════════════════════
+function showWelcome(user) {
+  // Ocultar pasos
+  document.querySelectorAll('[id^="step"]').forEach(el => el.classList.add('hidden'));
+  document.getElementById('welcomeScreen').classList.remove('hidden');
+  document.getElementById('welcomeScreen').classList.add('show');
+  document.getElementById('welcomeName').textContent = `¡Hola, ${user.username}!`;
+  document.getElementById('welcomeSub').textContent = `${user.email} · Acceso autorizado`;
+
+  const sess = DB.sessions.slice().reverse().find(x => x.userId === user.id && x.active);
+  document.getElementById('sessionInfo').innerHTML = `
+<strong>Session ID:</strong> ${sess ? sess.id : 'n/a'}<br>
+<strong>Usuario:</strong> ${user.username}<br>
+<strong>Email:</strong> ${user.email}<br>
+<strong>Inicio:</strong> ${sess ? new Date(sess.startedAt).toLocaleString('es-ES') : '-'}<br>
+<strong>Seguridad:</strong> CAPTCHA + PIN + Pregunta + TOTP + Email Alert`;
+  addLog('SUCCESS', `🎉 SESIÓN ACTIVA — "${user.username}" <${user.email}> — MFA completado`);
+}
+
+function doLogout() {
+  // Cerrar sesión activa
+  const s = DB.sessions.slice().reverse().find(x => x.active);
+  if (s) s.active = false;
+  saveDB();
+  addLog('INFO', 'Sesión cerrada por el usuario');
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('welcomeScreen').classList.remove('show');
+  refreshDataPanel();
+  toggleMode(false);
+  goTo(1);
+}
+
+// ═══════════════════════════════════════════════════════
+//  EMAIL SIMULATION
+// ═══════════════════════════════════════════════════════
+function simEmail(to, subject, body) {
+  const c = document.getElementById('emailSim');
+  const card = document.createElement('div');
+  card.className = 'email-card';
+  card.innerHTML = `
+    <div class="email-card-title">✉️ Email simulado enviado</div>
+    <div class="email-card-body">
+      <span style="color:var(--text-muted)">Para:</span> <span class="email-to">${escHtml(to)}</span><br>
+      <span style="color:var(--text-muted)">Asunto:</span> ${escHtml(subject)}<br>
+      <span style="color:var(--text-muted);font-size:9px">${escHtml(body.slice(0,80))}…</span>
+    </div>`;
+  c.appendChild(card);
+  setTimeout(() => { card.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(() => card.remove(), 300); }, 7000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════
+function toggleVis(id, el) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  el.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function toggleMode(reg) {
+  isRegistering = reg;
+  document.getElementById('btnToggle').textContent = reg ? 'Ya tengo cuenta' : 'Crear cuenta';
+  document.getElementById('viewTitle').textContent  = reg ? 'Crear cuenta' : 'Iniciar sesión';
+  document.getElementById('viewSub').textContent    = reg ? 'Registro seguro en SafeArt' : 'Acceso seguro a tu cuenta SafeArt';
+  document.getElementById('finalBtn').textContent   = reg ? 'Registrar →' : 'Entrar →';
+  document.getElementById('emailGroup').classList.toggle('hidden', !reg);
+  captchaSolved = false;
+  document.getElementById('captchaCheck').checked = false;
+  document.getElementById('captchaBox').classList.remove('solved');
+  document.getElementById('mfaForm') && document.getElementById('mfaForm').reset && 
+    document.querySelectorAll('input').forEach(i => i.value = '');
+  addLog('INFO', `Modo: ${reg ? 'REGISTRO' : 'INICIO DE SESIÓN'}`);
+}
+
+document.getElementById('btnToggle').onclick = function() {
+  toggleMode(!isRegistering);
+  goTo(1);
+};
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+window.onload = async () => {
+  await loadDB();
+  addLog('INFO', 'SafeArt v3.0 iniciado — PBKDF2-SHA512 · Email Alert · JSON Export');
+  goTo(1);
+};
+</script>
+
+<!-- Hidden form to prevent accidental submission -->
+<form id="mfaForm" style="display:none"></form>
+
+</body>
+</html>
