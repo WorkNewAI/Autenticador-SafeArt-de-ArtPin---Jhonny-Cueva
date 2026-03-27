@@ -42,10 +42,10 @@ Al iniciar sesión, el sistema simula el envío de un correo de alerta.
 - **Almacenamiento:** LocalStorage para persistencia de la base de datos simulada.
 
 ## 📂 Instalación y Uso
-1. Descarga el archivo `safeart_v3.html`.
+1. Descarga el archivo `safeart_v8.html`.
 2. Ábrelo en cualquier navegador moderno (Chrome, Firefox, Edge).
 3. Utiliza las credenciales por defecto para pruebas:
-   - **Usuario:** `artadmin`
-   - **Contraseña:** `SafeArt2024!`
-   - **PIN:** `4321`
-   - **Mascota:** `perro`
+   - **Usuario:** `Admin`
+   - **Contraseña:** `P@ssword123`
+   - **PIN:** `El que ponga en su smartphone (CELULAR) en mi caso fue 1996`
+   - **Mascota:** `cerbero`
